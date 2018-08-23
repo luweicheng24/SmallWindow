@@ -1,13 +1,17 @@
 package luwei.com.smallwindow;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     private WindowManager wm;
     private View netView;
     private WindowManager.LayoutParams mLayoutParams;
-    private Boolean granted = false;
     private int OVERLAY_PERMISSION_REQ_CODE = 2;
 
     @Override
@@ -33,8 +36,22 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void alertWindow(View view) {
-        if (wm != null) {
-            wm.addView(netView, mLayoutParams);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            requestDrawOverLays();
+        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW}, 1);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (wm != null) {
+                wm.addView(netView, mLayoutParams);
+            }
+        } else {
+            Toast.makeText(this, "权限申请失败", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -48,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
         //使用非CENTER时，可以通过设置XY的值来改变View的位置
-        mLayoutParams.gravity = Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL;
+        mLayoutParams.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
 
     }
 
@@ -61,10 +78,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void nextActivity(View view) {
-       // requestDrawOverLays();
-         startActivity(new Intent(this, SecondActivity.class));
+        // requestDrawOverLays();
+        startActivity(new Intent(this, SecondActivity.class));
     }
 
+
+    // android 23 以上先引导用户开启这个权限 该权限动态申请不了
     @TargetApi(Build.VERSION_CODES.M)
     public void requestDrawOverLays() {
         if (!Settings.canDrawOverlays(MainActivity.this)) {
@@ -72,7 +91,10 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + MainActivity.this.getPackageName()));
             startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
         } else {
-            // Already hold the SYSTEM_ALERT_WINDOW permission, do addview or something.
+            if (wm != null) {
+                wm.addView(netView, mLayoutParams);
+            }
+            Toast.makeText(this, "权限已经授予", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -81,12 +103,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
             if (!Settings.canDrawOverlays(this)) {
-                // SYSTEM_ALERT_WINDOW permission not granted...
-                Toast.makeText(this, "Permission Denieddd by user.Please Check it in Settings", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "设置权限拒绝", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Permission Allowed", Toast.LENGTH_SHORT).show();
-                granted = true;
-                // Already hold the SYSTEM_ALERT_WINDOW permission, do addview or something.
+                Toast.makeText(this, "设置权限成功", Toast.LENGTH_SHORT).show();
             }
         }
     }
