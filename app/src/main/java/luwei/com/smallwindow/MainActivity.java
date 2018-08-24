@@ -15,6 +15,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -23,9 +24,10 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     private WindowManager wm;
-    private View netView;
+    private SmallWindowView windowView;
     private WindowManager.LayoutParams mLayoutParams;
     private int OVERLAY_PERMISSION_REQ_CODE = 2;
+    private boolean isRange = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +38,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void alertWindow(View view) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            }
             requestDrawOverLays();
-        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW}, 1);
         }
     }
@@ -48,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             if (wm != null) {
-                wm.addView(netView, mLayoutParams);
+                wm.addView(windowView, mLayoutParams);
             }
         } else {
             Toast.makeText(this, "权限申请失败", Toast.LENGTH_SHORT).show();
@@ -56,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initNetViewLayout() {
-        netView = LayoutInflater.from(this).inflate(R.layout.small_window, null);
+        windowView = (SmallWindowView) LayoutInflater.from(this).inflate(R.layout.small_window, null);
         wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         mLayoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -65,15 +70,44 @@ public class MainActivity extends AppCompatActivity {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
         //使用非CENTER时，可以通过设置XY的值来改变View的位置
-        mLayoutParams.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+        mLayoutParams.gravity = Gravity.RIGHT;
+        windowView.setWm(wm);
+        windowView.setWmParams(mLayoutParams);
 
     }
+
+    private int[] location = new int[2];
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            isRange = calcPointRange(event);
+        }
+        if (isRange) {
+            windowView.dispatchTouchEvent(event);
+        }
+        return super.onTouchEvent(event);
+    }
+
+    private boolean calcPointRange(MotionEvent event) {
+        windowView.getLocationOnScreen(location);
+        int width = windowView.getMeasuredWidth();
+        int height = windowView.getMeasuredHeight();
+        float curX = event.getRawX();
+        float curY = event.getRawY();
+        if (curX >= location[0] && curX <= location[0] + width && curY >= location[1] && curY <= location[1] + height) {
+            return true;
+        }
+        return false;
+    }
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (wm != null && netView != null) {
-            wm.removeView(netView);
+        if (wm != null && windowView != null) {
+            wm.removeView(windowView);
         }
     }
 
@@ -92,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
         } else {
             if (wm != null) {
-                wm.addView(netView, mLayoutParams);
+                wm.addView(windowView, mLayoutParams);
             }
             Toast.makeText(this, "权限已经授予", Toast.LENGTH_SHORT).show();
         }
