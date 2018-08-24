@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -24,7 +25,6 @@ public class SmallWindowView extends LinearLayout {
     private float mTouchStartY;
     private float x;
     private float y;
-
 
     private WindowManager wm;
     public WindowManager.LayoutParams wmParams;
@@ -100,11 +100,14 @@ public class SmallWindowView extends LinearLayout {
                 updateViewPosition();
                 break;
             case MotionEvent.ACTION_UP:
-                if (wmParams.x <= 0) {
-                    wmParams.x = Math.abs(wmParams.x) <= screenWidth / 2 ? screenWidth : -screenWidth;
+                /*if (wmParams.x <= 0) {
+                    wmParams.x = Math.abs(wmParams.x) <= screenWidth / 2 ? -screenWidth : screenWidth;
                 } else {
-                    wmParams.x = wmParams.x <= screenWidth / 2 ? -screenWidth : screenWidth;
-                }
+                    wmParams.x = wmParams.x <= screenWidth / 2 ? screenWidth : -screenWidth;
+                }*/
+
+                 wmParams.x = screenWidth;
+                wmParams.y = (int) (y - screenHeight / 2);
                 wm.updateViewLayout(this, wmParams);
                 break;
         }
@@ -113,10 +116,16 @@ public class SmallWindowView extends LinearLayout {
 
 
     private void updateViewPosition() {
+
+
+        wmParams.gravity = Gravity.NO_GRAVITY;
         //更新浮动窗口位置参数
-        wmParams.x = (int) (x - mTouchStartX);
-        wmParams.y = (int) (y - mTouchStartY);
-        Log.i("winParams", "x : " + x + "======== mTouchStartX :" + mTouchStartX + "result" + (x - mTouchStartX));
-        wm.updateViewLayout(this, wmParams);  //刷新显示
+        int dx = (int) (mTouchStartX - x);
+        int dy = (int) (screenHeight / 2 - y);
+        wmParams.x = (screenWidth / 2 - dx);
+        wmParams.y = -dy;
+        Log.i("winParams", "x : " + wmParams.x + "y :" + wmParams.y + "  dy :" + dy);
+        wm.updateViewLayout(this, wmParams);
+        //刷新显示
     }
 }
