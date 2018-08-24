@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<luwei.com.smallwindow.SmallWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
 
     <TextView
-        android:background="#1a19b9"
-        android:alpha="0.8"
         android:layout_width="100dp"
-        android:textColor="@android:color/white"
         android:layout_height="100dp"
+        android:alpha="0.8"
+        android:background="#1a19b9"
         android:gravity="center"
-        android:text="录音中..."/>
-</LinearLayout>
+        android:text="录音中..."
+        android:textColor="@android:color/white"/>
+</luwei.com.smallwindow.SmallWindowView>

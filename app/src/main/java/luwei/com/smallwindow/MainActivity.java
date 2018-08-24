@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 PixelFormat.TRANSLUCENT);
         //使用非CENTER时，可以通过设置XY的值来改变View的位置
-        mLayoutParams.gravity = Gravity.RIGHT;
         windowView.setWm(wm);
         windowView.setWmParams(mLayoutParams);
 

@@ -100,14 +100,11 @@ public class SmallWindowView extends LinearLayout {
                 updateViewPosition();
                 break;
             case MotionEvent.ACTION_UP:
-               /* if (wmParams.x <= 0) {
+                if (wmParams.x <= 0) {
                     wmParams.x = Math.abs(wmParams.x) <= screenWidth / 2 ? screenWidth : -screenWidth;
                 } else {
                     wmParams.x = wmParams.x <= screenWidth / 2 ? -screenWidth : screenWidth;
                 }
-                wm.updateViewLayout(this, wmParams);*/
-                wmParams.x = 0;
-                wmParams.y = (int) (y - mTouchStartY);
                 wm.updateViewLayout(this, wmParams);
                 break;
         }
@@ -117,7 +114,7 @@ public class SmallWindowView extends LinearLayout {
 
     private void updateViewPosition() {
         //更新浮动窗口位置参数
-        wmParams.x = (int) (-x + mTouchStartX);
+        wmParams.x = (int) (x - mTouchStartX);
         wmParams.y = (int) (y - mTouchStartY);
         Log.i("winParams", "x : " + x + "======== mTouchStartX :" + mTouchStartX + "result" + (x - mTouchStartX));
         wm.updateViewLayout(this, wmParams);  //刷新显示
