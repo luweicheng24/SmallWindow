@@ -85,12 +85,20 @@ public class SmallWindowView extends LinearLayout {
         return statusHeight;
     }
 
+    boolean isRight = true;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         x = event.getRawX();
         y = event.getRawY() - statusHeight;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (wmParams.x > 0) {
+                    isRight = true;
+                }
+                if (wmParams.x < 0) {
+                    isRight = false;
+                }
                 mTouchStartX = event.getX();
                 mTouchStartY = event.getY();
                 Log.i("startP", "startX" + mTouchStartX + "====startY" + mTouchStartY);
@@ -100,13 +108,14 @@ public class SmallWindowView extends LinearLayout {
                 updateViewPosition();
                 break;
             case MotionEvent.ACTION_UP:
-                /*if (wmParams.x <= 0) {
+
+                if (wmParams.x <= 0) {
                     wmParams.x = Math.abs(wmParams.x) <= screenWidth / 2 ? -screenWidth : screenWidth;
                 } else {
                     wmParams.x = wmParams.x <= screenWidth / 2 ? screenWidth : -screenWidth;
-                }*/
+                }
 
-                 wmParams.x = screenWidth;
+                // wmParams.x = screenWidth;
                 wmParams.y = (int) (y - screenHeight / 2);
                 wm.updateViewLayout(this, wmParams);
                 break;
@@ -121,8 +130,12 @@ public class SmallWindowView extends LinearLayout {
         wmParams.gravity = Gravity.NO_GRAVITY;
         //更新浮动窗口位置参数
         int dx = (int) (mTouchStartX - x);
+        if (isRight) {
+            wmParams.x = screenWidth / 2 - dx;
+        } else {
+            wmParams.x = -dx - screenWidth / 2;
+        }
         int dy = (int) (screenHeight / 2 - y);
-        wmParams.x = (screenWidth / 2 - dx);
         wmParams.y = -dy;
         Log.i("winParams", "x : " + wmParams.x + "y :" + wmParams.y + "  dy :" + dy);
         wm.updateViewLayout(this, wmParams);
