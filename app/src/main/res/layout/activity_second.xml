@@ -4,13 +4,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#ffffff"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
-    <luwei.com.smallwindow.DragView
-        android:id="@+id/main_touchview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="#ffffff" />
-
+        android:gravity="center"
+        android:text="I AM SECOND"
+        android:id="@+id/tv"
+        />
+    <Button
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tv"
+        android:text="remove window"
+        android:textAllCaps="false"
+        android:onClick="dismissWindow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </RelativeLayout>

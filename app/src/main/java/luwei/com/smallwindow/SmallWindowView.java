@@ -122,21 +122,17 @@ public class SmallWindowView extends LinearLayout {
         }
         return true;
     }
-
-
     private void updateViewPosition() {
-
-
         wmParams.gravity = Gravity.NO_GRAVITY;
         //更新浮动窗口位置参数
         int dx = (int) (mTouchStartX - x);
+        int dy = (int) (y-screenHeight / 2);
         if (isRight) {
             wmParams.x = screenWidth / 2 - dx;
         } else {
             wmParams.x = -dx - screenWidth / 2;
         }
-        int dy = (int) (screenHeight / 2 - y);
-        wmParams.y = -dy;
+        wmParams.y = dy;
         Log.i("winParams", "x : " + wmParams.x + "y :" + wmParams.y + "  dy :" + dy);
         wm.updateViewLayout(this, wmParams);
         //刷新显示
